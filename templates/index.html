@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Chatbot Interface</title>
+  <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+  <div class="main-container">
+    
+    <!-- Left Side: Chat History -->
+    <div class="sidebar">
+      <h3>Recent</h3>
+      <ul id="history-list"></ul>
+     
+    </div>
+
+    <!-- Right Side: Active Chat -->
+    <div class="chat-container">
+      <div id="chat-box"></div>
+
+      <form id="chat-form">
+        <input type="text" id="user-input" placeholder="Type your message..." required />
+        <button type="submit">Send</button>
+      </form>
+    </div>
+    
+  </div>
+
+  <script src="{{ url_for('static', filename='script.js') }}"></script>
+</body>
+</html>

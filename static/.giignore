@@ -1,0 +1,32 @@
+# Python
+__pycache__/
+*.py[cod]
+*.sqlite3
+*.db
+
+# Virtual environments
+venv/
+env/
+
+# VS Code settings (optional)
+.vscode/
+
+# Environment variables
+.env
+
+# OS files
+.DS_Store
+Thumbs.db
+
+# Logs
+*.log
+
+# Compiled files
+*.pyc
+
+# Ignore static/media uploads (optional)
+static/uploads/
+
+# Ignore secrets and backups
+*.bak
+secrets.json
