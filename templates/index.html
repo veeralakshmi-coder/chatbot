@@ -5,6 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Chatbot Interface</title>
   <link rel="stylesheet" href="{{ url_for('static', filename='style.css') }}">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+
+
 </head>
 <body>
   <div class="main-container">
@@ -13,20 +17,90 @@
     <div class="sidebar">
       <h3>Recent</h3>
       <ul id="history-list"></ul>
-     
+       <div class="sidebar-bottom">
+    <button id="settings-btn">⚙️ Settings</button>
+    <button id="help-btn">❓ Help</button>
+  </div>
+  <!-- 🔧 Settings Modal -->
+<div id="settings-modal" class="modal">
+  <div class="modal-content">
+    <span class="close-btn" onclick="closeModal('settings-modal')">&times;</span>
+    <h2>⚙️ Settings</h2>
+    <p>Toggle theme, clear chat history, or manage preferences here.</p>
+    <button id="clear-history">🧹 Clear History</button>
+  </div>
+</div>
+
+<!-- ❓ Help Modal -->
+<div id="help-modal" class="modal">
+  <div class="modal-content">
+    <span class="close-btn" onclick="closeModal('help-modal')">&times;</span>
+    <h2>❓ Help</h2>
+    <p>This chatbot lets you talk, listen, download chat, and more.</p>
+    <ul>
+      <li>🎤 Click mic to speak</li>
+      <li>🌙 Toggle dark/light mode</li>
+      <li>📄 Download full conversation</li>
+    </ul>
+  </div>
+</div>
+
     </div>
+   
 
     <!-- Right Side: Active Chat -->
     <div class="chat-container">
+
+         <!-- 🛠️ Tools -->
+  <div class="chat-tools">
+   <button id="toggle-theme">🌙 Dark Mode</button>
+
+    <button id="download-chat" title="Download Chat">📄</button>
+  </div>
+
       <div id="chat-box"></div>
 
-      <form id="chat-form">
-        <input type="text" id="user-input" placeholder="Type your message..." required />
-        <button type="submit">Send</button>
-      </form>
+<form id="chat-form">
+  <div class="input-toolbar">
+    <!-- 🎤 Mic and ➕ Buttons -->
+    <div class="tool-buttons">
+      <button type="button" id="mic-btn" title="Speak your message">
+        <i class="fas fa-microphone"></i>
+      </button>
+
+      <button type="button" id="plus-btn" title="More Options">
+        <i class="fas fa-plus"></i>
+      </button>
+
+      <!-- 🎤 Indicator -->
+      <span id="listening-indicator">🎤 Listening...</span>
+    </div>
+
+    <!-- 📎 Dropdown beside plus -->
+    <div id="tool-menu" class="tool-menu hidden">
+      <label class="tool-item" title="Upload File">
+        📎 File
+        <input type="file" id="file-input" style="display: none;" />
+      </label>
+    </div>
+  </div>
+
+  <input type="text" id="user-input" placeholder="Type your message..." />
+  <button type="submit"><i class="fas fa-paper-plane"></i> Send</button>
+</form>
+
+
+
+      <!-- ⚡ Quick Reply Suggestions -->
+      <div id="quick-replies" class="quick-replies"></div>
     </div>
     
   </div>
+
+
+
+  >
+
 
   <script src="{{ url_for('static', filename='script.js') }}"></script>
 </body>
