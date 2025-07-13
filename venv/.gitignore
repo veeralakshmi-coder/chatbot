@@ -1,0 +1,16 @@
+# Python
+__pycache__/
+*.pyc
+
+# Virtual environment
+venv/
+
+# Database
+chat_history.db
+instance/
+
+# Uploaded files
+uploads/
+
+# Secrets
+.env

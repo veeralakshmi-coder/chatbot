@@ -1,13 +1,12 @@
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, render_template, request, jsonify, send_from_directory
 from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
 from dotenv import load_dotenv
 import os, requests, time
 import werkzeug
-werkzeug.cached_property = werkzeug.utils.cached_property  # Fix if using older Flask version
+werkzeug.cached_property = werkzeug.utils.cached_property  # For older Flask versions
 
-from flask import send_from_directory
-# Load environment variables
+# === Load environment variables ===
 load_dotenv()
 
 app = Flask(__name__)
@@ -22,9 +21,12 @@ db = SQLAlchemy(app)
 API_URL = "https://openrouter.ai/api/v1/chat/completions"
 API_KEY = os.getenv("OPENROUTER_API_KEY")
 
+
 # Debug print API key status
 if not API_KEY:
     print("❌ OPENROUTER_API_KEY is not loaded from .env file!")
+else:
+    print("🔑 API Key Loaded:", API_KEY[:10] + "...")
 
 # === Message Model ===
 class Message(db.Model):
@@ -36,6 +38,11 @@ class Message(db.Model):
 with app.app_context():
     db.create_all()
 
+# === Upload Folder Config ===
+UPLOAD_FOLDER = os.path.join(os.getcwd(), "uploads")
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
+
 # === Routes ===
 
 @app.route("/")
@@ -44,7 +51,6 @@ def index():
 
 @app.route("/chat", methods=["POST"])
 def chat():
-    # Handle file and message from FormData
     user_input = request.form.get("message", "")
     file = request.files.get("file")
 
@@ -60,7 +66,7 @@ def chat():
     else:
         return jsonify({"reply": "⚠ No input received."})
 
-    # Send to OpenRouter
+    # Prepare API call to OpenRouter
     headers = {
         "Content-Type": "application/json",
         "Authorization": f"Bearer {API_KEY}"
@@ -77,16 +83,23 @@ def chat():
     try:
         res = requests.post(API_URL, headers=headers, json=body, timeout=30)
         data = res.json()
-        reply = data["choices"][0]["message"]["content"]
+        print("✅ API raw response:", data)
+
+        if "choices" in data:
+            reply = data["choices"][0]["message"]["content"]
+        elif "error" in data:
+            print("❌ API error message:", data["error"])
+            reply = f"⚠ API Error: {data['error']}"
+        else:
+            print("❌ Unexpected API format:", data)
+            reply = "⚠ Unexpected API response format."
     except Exception as e:
-        print("❌ API error:", e)
+        print("❌ Exception during API call:", e)
         reply = "⚠ Error during processing."
 
     db.session.add(Message(sender="bot", text=reply))
     db.session.commit()
     return jsonify({"reply": reply})
-
-
 
 @app.route("/history")
 def history():
@@ -117,7 +130,6 @@ def feedback():
     else:
         return jsonify({"error": "Message not found"}), 404
 
-
 @app.route("/delete_message_pair", methods=["POST"])
 def delete_message_pair():
     data = request.get_json()
@@ -125,10 +137,8 @@ def delete_message_pair():
     if not bot_text:
         return jsonify({"error": "No message provided"}), 400
 
-    # Delete bot reply first
     bot_msg = Message.query.filter_by(sender="bot", text=bot_text).order_by(Message.id.desc()).first()
     if bot_msg:
-        # Delete the user message before this bot message
         user_msg = Message.query.filter(Message.id < bot_msg.id, Message.sender == "user").order_by(Message.id.desc()).first()
         
         db.session.delete(bot_msg)
@@ -139,13 +149,6 @@ def delete_message_pair():
         return jsonify({"success": True})
     
     return jsonify({"error": "Bot message not found"}), 404
-
-
-
-
-UPLOAD_FOLDER = os.path.join(os.getcwd(), "uploads")
-os.makedirs(UPLOAD_FOLDER, exist_ok=True)
-app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
 
 @app.route("/upload", methods=["POST"])
 def upload():
